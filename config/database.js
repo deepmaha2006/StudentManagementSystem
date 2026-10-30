@@ -12,15 +12,7 @@ const connectDB = async () => {
         cached.promise = mongoose.connect(process.env.MONGODB_URI);
     }
 
-    try {
-        cached.conn = await cached.promise;
-        console.log("MongoDB Atlas Connected Successfully");
-    } catch (error) {
-        cached.promise = null;
-        console.error("MongoDB Connection Error:", error.message);
-        process.exit(1);
-    }
-
+    cached.conn = await cached.promise;
     return cached.conn;
 };
 
