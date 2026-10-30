@@ -1,7 +1,8 @@
 require("dotenv").config();
 
 const express = require("express");
-const cors = require("cors");
+const cors    = require("cors");
+const path    = require("path");
 const connectDB = require("./config/database");
 
 const app = express();
@@ -9,20 +10,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-    res.json({
-        message: "Student Management API is running"
-    });
-});
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, "public")));
 
+// API routes
 app.use("/api/students", require("./routes/studentRoutes"));
-app.use("/api/courses", require("./routes/courseRoutes"));
+app.use("/api/courses",  require("./routes/courseRoutes"));
 
-app.use((req, res) => {
-    res.status(404).json({ message: "Route not found" });
+// API 404
+app.use("/api", (req, res) => {
+    res.status(404).json({ message: "API route not found" });
 });
 
-// Connect to MongoDB (cached for serverless)
+// Serve frontend for all other routes (SPA fallback)
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Connect to MongoDB
 connectDB();
 
 // For local development
