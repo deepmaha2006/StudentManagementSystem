@@ -10,13 +10,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Ensure DB is connected before every request (uses cached connection)
-app.use(async (req, res, next) => {
+// Health check (no DB required) — confirms function loads correctly
+app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", env: !!process.env.MONGODB_URI });
+});
+
+// Ensure DB is connected before API requests
+app.use("/api", async (req, res, next) => {
     try {
         await connectDB();
         next();
     } catch (err) {
-        res.status(500).json({ error: "Database connection failed" });
+        console.error("DB connection error:", err.message);
+        res.status(500).json({ error: "Database connection failed", detail: err.message });
     }
 });
 
